@@ -2,61 +2,108 @@
 import React, { Component } from "react";
 import "./App.css";
 import Person from "./Person/Person";
+import Radium, { StyleRoot } from "radium";
 class App extends Component {
   state = {
     persons: [
-      { name: "Max", age: 28 },
-      { name: "Manu", age: 29 },
-      { name: "Stephanie", age: 26 }
+      { id: "sdfasdf1231", name: "Max", age: 28 },
+      { id: "asfasdxzc3435", name: "Manu", age: 29 },
+      { id: "sasdgart322", name: "Stephanie", age: 26 }
     ],
-    otherState: "some other value"
+    otherState: "some other value",
+    showPersons: false
   };
 
-  switchNameHandler = newName => {
-    // console.log("Was clicked!");
-    // DON'T DO THIS: this.state.persons[0].name = "Maximilian";
+  deletePersonHandler = personIndex => {
+    // const persons = this.state.persons.slice();
+    const persons = [...this.state.persons];
+    persons.splice(personIndex, 1);
+    this.setState({ persons: persons });
+  };
+
+  nameChangedHandler = (event, id) => {
+    const personIndex = this.state.persons.findIndex(data => {
+      return data.id === id;
+    });
+
+    const person = { ...this.state.persons[personIndex] };
+
+    person.name = event.target.value;
+
+    const persons = [...this.state.persons];
+    persons[personIndex] = person;
+
     this.setState({
-      persons: [
-        { name: newName, age: 28 },
-        { name: "Manuel", age: 30 },
-        { name: "Stephanie", age: 27 }
-      ]
+      persons: persons
     });
   };
 
-  nameChangedHandler = event => {
-    this.setState({
-      persons: [
-        { name: "Max", age: 28 },
-        { name: "Manu", age: 29 },
-        { name: "Stephanie", age: 26 }
-      ]
-    });
+  togglePersonsHandle = () => {
+    const doesShow = this.state.showPersons;
+    this.setState({ showPersons: !doesShow });
   };
 
   render() {
-    return (
-      <div className="App">
-        <h1> Hi, I 'm a React App</h1> <p> This is really working!!! </p>{" "}
-        <button onClick={this.switchNameHandler.bind(this, "Maximilian")}>
+    const style = {
+      backgroundColor: "green",
+      color: "white",
+      font: "inherit",
+      border: "1px solid blue",
+      padding: "8px",
+      cursor: "pointer",
+      ":hover": {
+        backgroundColor: "lightgreen",
+        color: "black"
+      }
+    };
+
+    let persons = null;
+    if (this.state.showPersons) {
+      persons = (
+        <div>
           {" "}
-          Switch Name{" "}
-        </button>{" "}
-        <Person
-          name={this.state.persons[0].name}
-          age={this.state.persons[0].age}
-        />{" "}
-        <Person
-          name={this.state.persons[1].name}
-          age={this.state.persons[1].age}
-          click={this.switchNameHandler.bind(this, "Max!")}
-        />
-        Hobbies: Racing{" "}
-        <Person
-          name={this.state.persons[2].name}
-          age={this.state.persons[2].age}
-        />{" "}
-      </div>
+          {this.state.persons.map((person, index) => {
+            return (
+              <Person
+                click={() => {
+                  this.deletePersonHandler(index);
+                }}
+                name={person.name}
+                age={person.age}
+                key={person.id}
+                changed={event => this.nameChangedHandler(event, person.id)}
+              />
+            );
+          })}{" "}
+        </div>
+      );
+      style.backgroundColor = "red";
+      style[":hover"] = {
+        backgroundColor: "lightred",
+        color: "black"
+      };
+    }
+
+    const classes = [];
+    if (this.state.persons.length <= 2) {
+      classes.push("red");
+    }
+    if (this.state.persons.length <= 1) {
+      classes.push("bold");
+    }
+
+    return (
+      <StyleRoot>
+        <div className="App">
+          <h1> Hi, I 'm a React App</h1>{" "}
+          <p className={classes.join(" ")}> This is really working!!! </p>{" "}
+          <button style={style} onClick={this.togglePersonsHandle}>
+            {" "}
+            Toggle Persons{" "}
+          </button>{" "}
+          {persons}{" "}
+        </div>{" "}
+      </StyleRoot>
     );
   }
 }
@@ -111,4 +158,4 @@ class App extends Component {
 //   );
 // };
 
-export default App;
+export default Radium(App);
